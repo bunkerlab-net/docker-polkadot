@@ -26,6 +26,11 @@ RUN cargo build --locked --release \
 ##################
 FROM docker.io/debian:12-slim
 
+# Install curl for healthcheck
+RUN apt-get update && \
+    apt-get install -y curl && \
+    rm -rf /var/lib/apt/lists/*
+
 RUN addgroup --gid 65532 nonroot \
   && adduser --system --uid 65532 --gid 65532 --home /home/nonroot nonroot
 
@@ -37,13 +42,18 @@ USER 65532
 
 # P2P
 EXPOSE 30333
-# RPC
+# HTTP RPC
 EXPOSE 9933
-# WS
+# WebSocket RPC
 EXPOSE 9944
 # Prometheus
 EXPOSE 9615
 
 VOLUME /data
+
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=30s \
+    CMD curl -H "Content-Type: application/json" \
+        -d '{"id":1, "jsonrpc":"2.0", "method":"system_health", "params":[]}' \
+        http://localhost:9944
 
 ENTRYPOINT [ "/usr/local/bin/polkadot" ]
