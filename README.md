@@ -1,9 +1,7 @@
 # Docker Polkadot
 My personal unprivileged Polkadot Docker image.
 
-[![Github tag (latest by date)][github-tag-badge]][github-tag-link]
-
-[![GitHub Workflow Status (branch)][github-actions-badge]][github-actions-link]
+[![Github tag (latest by date)][github-tag-badge]][github-tag-link] [![GitHub Workflow Status (branch)][github-actions-badge]][github-actions-link]
 
 Usage:
 ```sh
