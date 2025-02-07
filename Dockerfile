@@ -13,8 +13,8 @@ RUN rustup target add wasm32-unknown-unknown
 RUN rustup component add rust-src
 
 WORKDIR /opt
-ARG VERSION=polkadot-stable2412-1
-RUN git clone https://github.com/paritytech/polkadot-sdk.git -b $VERSION --depth 1
+ARG VERSION=stable2412-1
+RUN git clone https://github.com/paritytech/polkadot-sdk.git -b polkadot-$VERSION --depth 1
 WORKDIR /opt/polkadot-sdk
 RUN cargo build --locked --release \
   --bin polkadot \
