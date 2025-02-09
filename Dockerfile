@@ -1,14 +1,14 @@
 ###################
 # --- builder --- #
 ###################
-FROM docker.io/rust:1.85 AS builder
+FROM docker.io/rust:1.85-alpine AS builder
 
-RUN apt-get update && \
-    apt-get -y dist-upgrade && \
-    apt-get -y install \
-      libclang-dev protobuf-compiler
+RUN apk add --update --no-cache \
+      clang-dev \
+      git \
+      make \
+      protoc
 
-ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 RUN rustup target add wasm32-unknown-unknown
 RUN rustup component add rust-src
 
@@ -24,15 +24,12 @@ RUN cargo build --locked --release \
 ##################
 # --- runner --- #
 ##################
-FROM docker.io/debian:12-slim
+FROM docker.io/alpine:3 AS polkadot
 
 # Install curl for healthcheck
-RUN apt-get update && \
-    apt-get install -y curl && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN addgroup --gid 65532 nonroot \
-  && adduser --system --uid 65532 --gid 65532 --home /home/nonroot nonroot
+RUN apk add --update --no-cache curl \
+  && addgroup -g 65532 nonroot \
+  && adduser -S -u 65532 -G nonroot -h /home/nonroot -s /bin/sh nonroot
 
 COPY --from=builder /opt/polkadot-sdk/target/release/polkadot /usr/local/bin/polkadot
 COPY --from=builder /opt/polkadot-sdk/target/release/polkadot-execute-worker /usr/local/bin/polkadot-execute-worker
