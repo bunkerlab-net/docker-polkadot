@@ -91,11 +91,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           push: true
           cache-from: |
-            type=gha,scope=docker-package
             type=gha,scope=docker-build-amd64
             type=gha,scope=docker-build-arm64
-          cache-to: |
-            type=gha,mode=max,scope=docker-package
           context: .
           build-args: >-
-            ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'release' && format('VERSION={0}', github.ref_name) || '' }}
+            ${{ github.event_name == 'release' && format('VERSION={0}', github.ref_name) || '' }}
