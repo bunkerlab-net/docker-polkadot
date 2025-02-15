@@ -1,7 +1,7 @@
 # Docker Polkadot
 My personal unprivileged Polkadot Docker image.
 
-[![Github release (latest by date)][github-release-badge]][github-release-link] [![GitHub Workflow Status (branch)][github-actions-badge]][github-actions-link]
+[![Latest Github release][github-release-badge]][github-release-link] [![GitHub Workflow Status (branch)][github-actions-badge]][github-actions-link]
 
 Usage:
 ```sh
@@ -41,7 +41,7 @@ You should read their [Lightpaper](https://polkadot.network/Polkadot-lightpaper.
 * [/r/dot](https://www.reddit.com/r/dot)
 
 
-[github-release-badge]: https://img.shields.io/github/v/release/bunkerlab-net/docker-polkadot "Github tag (latest by date)"
+[github-release-badge]: https://img.shields.io/github/v/release/bunkerlab-net/docker-polkadot "Latest Github tag"
 [github-release-link]: https://github.com/bunkerlab-net/docker-polkadot/releases
 [github-actions-badge]: https://img.shields.io/github/actions/workflow/status/bunkerlab-net/docker-polkadot/docker.yml?branch=master "Github Workflow Status (master)"
 [github-actions-link]: https://github.com/bunkerlab-net/docker-polkadot/actions?query=workflow%3ADocker
