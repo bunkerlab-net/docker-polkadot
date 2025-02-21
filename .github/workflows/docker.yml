@@ -5,9 +5,15 @@ on:
   push:
     branches:
       - master
+    paths:
+      - ".github/workflows/**"
+      - "Dockerfile"
   pull_request:
     branches:
       - master
+    paths:
+      - ".github/workflows/**"
+      - "Dockerfile"
   release:
     types: [published]
 
