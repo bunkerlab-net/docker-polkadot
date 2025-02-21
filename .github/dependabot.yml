@@ -1,7 +1,15 @@
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
 version: 2
+
 updates:
   # Maintain dependencies for Github Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: github-actions
+    directory: /
     schedule:
-      interval: "daily"
+      interval: daily
+
+  # Maintain Dockerfile dependencies
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: daily
