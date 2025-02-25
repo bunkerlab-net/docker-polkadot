@@ -52,7 +52,7 @@ EXPOSE 9615
 VOLUME /data
 
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=30s \
-    CMD curl -H "Content-Type: application/json" \
+    CMD curl -s -H "Content-Type: application/json" \
         -d '{"id":1, "jsonrpc":"2.0", "method":"system_health", "params":[]}' \
         http://localhost:9944
 
