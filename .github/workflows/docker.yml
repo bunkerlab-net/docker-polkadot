@@ -37,6 +37,8 @@ jobs:
       - uses: docker/setup-buildx-action@v3
         with:
           cache-binary: false
+          install: true
+          version: latest
       - name: Build
         uses: docker/build-push-action@v6
         with:
@@ -69,6 +71,8 @@ jobs:
       - uses: docker/setup-buildx-action@v3
         with:
           cache-binary: false
+          install: true
+          version: latest
       - name: Check if release is latest
         if: github.event_name == 'release'
         id: check_latest
