@@ -38,7 +38,6 @@ You should read their [Lightpaper](https://polkadot.network/Polkadot-lightpaper.
 * [paritytech/polkadot-sdk](https://github.com/paritytech/polkadot-sdk)
 * [Polkadot.Network](https://polkadot.network/)
 * [/r/polkadot](https://www.reddit.com/r/polkadot)
-* [/r/dot](https://www.reddit.com/r/dot)
 
 
 [github-release-badge]: https://img.shields.io/github/v/release/bunkerlab-net/docker-polkadot "Latest Github tag"
