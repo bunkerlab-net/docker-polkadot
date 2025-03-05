@@ -9,11 +9,10 @@ RUN apt-get update && \
       libclang-dev protobuf-compiler
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
-RUN rustup target add wasm32-unknown-unknown
-RUN rustup component add rust-src
+RUN rustup target add wasm32v1-none
 
 WORKDIR /opt
-ARG VERSION=stable2412-2
+ARG VERSION=stable2503-rc1
 RUN git clone https://github.com/paritytech/polkadot-sdk.git -b polkadot-$VERSION --depth 1
 WORKDIR /opt/polkadot-sdk
 RUN cargo build --locked --release \
