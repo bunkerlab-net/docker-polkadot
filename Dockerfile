@@ -12,7 +12,7 @@ ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 RUN rustup target add wasm32v1-none
 
 WORKDIR /opt
-ARG VERSION=stable2503-rc1
+ARG VERSION=stable2503-rc2
 RUN git clone https://github.com/paritytech/polkadot-sdk.git -b polkadot-$VERSION --depth 1
 WORKDIR /opt/polkadot-sdk
 RUN cargo build --locked --release \
