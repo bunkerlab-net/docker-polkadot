@@ -23,7 +23,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   polkadot:
-    image: ghcr.io/bunkerlab-net/polkadot:stable2412-2
+    image: ghcr.io/bunkerlab-net/polkadot
     container_name: polkadot
     command:
       - --base-path
