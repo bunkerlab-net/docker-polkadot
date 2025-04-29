@@ -1,12 +1,16 @@
 ###################
 # --- builder --- #
 ###################
-FROM docker.io/rust:1.86 AS builder
+FROM docker.io/rust:1.86-slim AS builder
 
 RUN apt-get update && \
     apt-get -y dist-upgrade && \
     apt-get -y install \
-      libclang-dev protobuf-compiler
+      g++ \
+      git \
+      libclang-dev \
+      make \
+      protobuf-compiler
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 RUN rustup target add wasm32v1-none
