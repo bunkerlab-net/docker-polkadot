@@ -47,7 +47,7 @@ jobs:
           cache-from: |
             type=gha,scope=docker-build-${{ matrix.arch }}
           cache-to: |
-            type=gha,mode=max,scope=docker-build-${{ matrix.arch }}
+            type=gha,mode=min,scope=docker-build-${{ matrix.arch }}
           context: .
           build-args: >-
             ${{ github.event_name == 'release' && format('VERSION={0}', github.ref_name) || '' }}
