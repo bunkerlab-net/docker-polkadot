@@ -17,15 +17,21 @@ on:
   release:
     types: [published]
 
+permissions: {}
+
 jobs:
   docker:
     name: Docker
     uses: ./.github/workflows/docker.yml
+    permissions:
+      packages: write
 
   publish:
     name: Publish
     needs: docker
     if: github.event_name == 'release'
     uses: ./.github/workflows/publish.yml
+    permissions:
+      contents: write
     with:
       version: ${{ needs.docker.outputs.version }}

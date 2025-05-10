@@ -7,6 +7,11 @@ on:
         required: true
         type: string
 
+permissions: {}
+
+env:
+  VERSION: ${{ inputs.version }}
+
 jobs:
   release-assets:
     name: Release Assets
@@ -25,14 +30,14 @@ jobs:
     steps:
       - name: Pull Docker image
         run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/polkadot:${{ inputs.version }}
+          docker pull ghcr.io/${{ github.repository_owner }}/polkadot:${VERSION}
 
       - name: Create directory for binaries
         run: mkdir -p binaries
 
       - name: Extract binaries from image
         run: |
-          container_id=$(docker create ghcr.io/${{ github.repository_owner }}/polkadot:${{ inputs.version }})
+          container_id=$(docker create ghcr.io/${{ github.repository_owner }}/polkadot:${VERSION})
           docker cp $container_id:/usr/local/bin/polkadot binaries/
           docker cp $container_id:/usr/local/bin/polkadot-execute-worker binaries/
           docker cp $container_id:/usr/local/bin/polkadot-prepare-worker binaries/
@@ -47,15 +52,15 @@ jobs:
 
       - name: Create tarball
         run: |
-          tar -czvf polkadot-${{ inputs.version }}-${{ matrix.arch }}.tgz -C binaries .
+          tar -czvf polkadot-${VERSION}-${{ matrix.arch }}.tgz -C binaries .
 
       - name: Generate SHA-256 for tarball
         run: |
-          sha256sum polkadot-${{ inputs.version }}-${{ matrix.arch }}.tgz > polkadot-${{ inputs.version }}-${{ matrix.arch }}.tgz.sha256
+          sha256sum polkadot-${VERSION}-${{ matrix.arch }}.tgz > polkadot-${VERSION}-${{ matrix.arch }}.tgz.sha256
 
       - name: Upload assets to release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2.2.2
         with:
           files: |
-            polkadot-${{ inputs.version }}-${{ matrix.arch }}.tgz
-            polkadot-${{ inputs.version }}-${{ matrix.arch }}.tgz.sha256
+            polkadot-${{ env.VERSION }}-${{ matrix.arch }}.tgz
+            polkadot-${{ env.VERSION }}-${{ matrix.arch }}.tgz.sha256
