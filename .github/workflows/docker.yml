@@ -128,15 +128,9 @@ jobs:
             runs-on: ubuntu-24.04-arm
 
     steps:
-      - uses: docker/setup-buildx-action@v3
-        with:
-          cache-binary: false
-          install: true
-          version: latest
-
       - name: Pull Docker image
         run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/polkadot:${{ needs.package.outputs.version }}
+          docker pull ghcr.io/${{ github.repository_owner }}/polkadot:${{ needs.push.outputs.version }}
 
       - name: Create directory for binaries
         run: mkdir -p binaries
