@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/**"
+      - Dockerfile
+  pull_request:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/**"
+      - Dockerfile
+  release:
+    types: [published]
+
+jobs:
+  docker:
+    name: Docker
+    uses: ./.github/workflows/docker.yml
+
+  publish:
+    name: Publish
+    needs: docker
+    if: github.event_name == 'release'
+    uses: ./.github/workflows/publish.yml
+    with:
+      version: ${{ needs.docker.outputs.version }}

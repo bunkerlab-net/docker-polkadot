@@ -2,26 +2,17 @@ name: Docker
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
-    paths:
-      - ".github/workflows/**"
-      - "Dockerfile"
-  pull_request:
-    branches:
-      - master
-    paths:
-      - ".github/workflows/**"
-      - "Dockerfile"
-  release:
-    types: [published]
+  workflow_call:
+    outputs:
+      version:
+        description: The version of the image
+        value: ${{ jobs.push.outputs.version }}
 
 permissions: {}
 
 jobs:
   build:
-    name: Docker / Build
+    name: Build
     runs-on: ${{ matrix.runs-on }}
     strategy:
       matrix:
@@ -54,8 +45,8 @@ jobs:
             ${{ github.event_name == 'release' && format('VERSION={0}', github.ref_name) || '' }}
 
   push:
-    name: Docker / Push
-    needs: [build]
+    name: Push
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -110,57 +101,3 @@ jobs:
           context: .
           build-args: >-
             ${{ github.event_name == 'release' && format('VERSION={0}', github.ref_name) || '' }}
-
-  publish-release-assets:
-    name: Publish Release Assets
-    needs: push
-    if: github.event_name == 'release'
-    runs-on: ${{ matrix.runs-on }}
-    permissions:
-      contents: write
-    strategy:
-      matrix:
-        arch: [x86_64, arm64]
-        include:
-          - arch: x86_64
-            runs-on: ubuntu-24.04
-          - arch: arm64
-            runs-on: ubuntu-24.04-arm
-
-    steps:
-      - name: Pull Docker image
-        run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/polkadot:${{ needs.push.outputs.version }}
-
-      - name: Create directory for binaries
-        run: mkdir -p binaries
-
-      - name: Extract binaries from image
-        run: |
-          container_id=$(docker create ghcr.io/${{ github.repository_owner }}/polkadot:${{ github.ref_name }})
-          docker cp $container_id:/usr/local/bin/polkadot binaries/
-          docker cp $container_id:/usr/local/bin/polkadot-execute-worker binaries/
-          docker cp $container_id:/usr/local/bin/polkadot-prepare-worker binaries/
-          docker rm $container_id
-
-      - name: Generate SHA-256 hashes for binaries
-        working-directory: binaries
-        run: |
-          sha256sum polkadot > polkadot.sha256
-          sha256sum polkadot-execute-worker > polkadot-execute-worker.sha256
-          sha256sum polkadot-prepare-worker > polkadot-prepare-worker.sha256
-
-      - name: Create tarball
-        run: |
-          tar -czvf polkadot-${{ github.ref_name }}-${{ matrix.arch }}.tgz -C binaries .
-
-      - name: Generate SHA-256 for tarball
-        run: |
-          sha256sum polkadot-${{ github.ref_name }}-${{ matrix.arch }}.tgz > polkadot-${{ github.ref_name }}-${{ matrix.arch }}.tgz.sha256
-
-      - name: Upload assets to release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            polkadot-${{ github.ref_name }}-${{ matrix.arch }}.tgz
-            polkadot-${{ github.ref_name }}-${{ matrix.arch }}.tgz.sha256
