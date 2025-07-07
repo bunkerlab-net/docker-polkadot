@@ -24,7 +24,8 @@ WORKDIR /opt
 ARG VERSION=stable2503-6
 RUN git clone https://github.com/paritytech/polkadot-sdk.git -b polkadot-$VERSION --depth 1
 WORKDIR /opt/polkadot-sdk
-RUN cargo build --locked --release \
+RUN cargo build --locked \
+  --profile production \
   --bin polkadot \
   --bin polkadot-execute-worker \
   --bin polkadot-prepare-worker
@@ -42,9 +43,9 @@ RUN apt-get update && \
 RUN addgroup --gid 65532 nonroot \
   && adduser --system --uid 65532 --gid 65532 --home /home/nonroot nonroot
 
-COPY --from=builder /opt/polkadot-sdk/target/release/polkadot /usr/local/bin/polkadot
-COPY --from=builder /opt/polkadot-sdk/target/release/polkadot-execute-worker /usr/local/bin/polkadot-execute-worker
-COPY --from=builder /opt/polkadot-sdk/target/release/polkadot-prepare-worker /usr/local/bin/polkadot-prepare-worker
+COPY --from=builder /opt/polkadot-sdk/target/production/polkadot /usr/local/bin/polkadot
+COPY --from=builder /opt/polkadot-sdk/target/production/polkadot-execute-worker /usr/local/bin/polkadot-execute-worker
+COPY --from=builder /opt/polkadot-sdk/target/production/polkadot-prepare-worker /usr/local/bin/polkadot-prepare-worker
 
 USER 65532
 
