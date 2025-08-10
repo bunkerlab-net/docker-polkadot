@@ -1,7 +1,7 @@
 ###################
 # --- builder --- #
 ###################
-FROM docker.io/rust:1.88-slim AS builder
+FROM docker.io/rust:1.89-slim AS builder
 
 RUN apt-get update && \
     apt-get -y dist-upgrade && \
