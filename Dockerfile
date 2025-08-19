@@ -41,7 +41,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 RUN groupadd --gid 65532 nonroot \
-  && useradd --system --uid 65532 --gid 65532 --home /home/nonroot nonroot
+  && useradd --system --uid 65532 --gid 65532 --create-home --home-dir /home/nonroot --shell /usr/bin/bash nonroot
 
 COPY --from=builder /opt/polkadot-sdk/target/production/polkadot /usr/local/bin/polkadot
 COPY --from=builder /opt/polkadot-sdk/target/production/polkadot-execute-worker /usr/local/bin/polkadot-execute-worker
