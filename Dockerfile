@@ -1,7 +1,7 @@
 ###################
 # --- builder --- #
 ###################
-FROM docker.io/rust:1.89-slim AS builder
+FROM docker.io/rust:1.89-slim-trixie AS builder
 
 RUN apt-get update && \
     apt-get -y dist-upgrade && \
@@ -33,15 +33,15 @@ RUN cargo build --locked \
 ##################
 # --- runner --- #
 ##################
-FROM docker.io/debian:12-slim
+FROM docker.io/debian:13-slim
 
 # Install curl for healthcheck
 RUN apt-get update && \
     apt-get install -y curl && \
     rm -rf /var/lib/apt/lists/*
 
-RUN addgroup --gid 65532 nonroot \
-  && adduser --system --uid 65532 --gid 65532 --home /home/nonroot nonroot
+RUN groupadd --gid 65532 nonroot \
+  && useradd --system --uid 65532 --gid 65532 --home /home/nonroot nonroot
 
 COPY --from=builder /opt/polkadot-sdk/target/production/polkadot /usr/local/bin/polkadot
 COPY --from=builder /opt/polkadot-sdk/target/production/polkadot-execute-worker /usr/local/bin/polkadot-execute-worker
