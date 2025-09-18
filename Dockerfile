@@ -1,7 +1,7 @@
 ###################
 # --- builder --- #
 ###################
-FROM docker.io/rust:1.89-slim-trixie AS builder
+FROM docker.io/rust:1.90-slim-trixie AS builder
 
 RUN apt-get update && \
     apt-get -y dist-upgrade && \
