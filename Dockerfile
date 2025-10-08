@@ -28,7 +28,8 @@ RUN cargo build --locked \
   --profile production \
   --bin polkadot \
   --bin polkadot-execute-worker \
-  --bin polkadot-prepare-worker
+  --bin polkadot-prepare-worker \
+  --bin polkadot-parachain
 
 ##################
 # --- runner --- #
@@ -46,6 +47,7 @@ RUN groupadd --gid 65532 nonroot \
 COPY --from=builder /opt/polkadot-sdk/target/production/polkadot /usr/local/bin/polkadot
 COPY --from=builder /opt/polkadot-sdk/target/production/polkadot-execute-worker /usr/local/bin/polkadot-execute-worker
 COPY --from=builder /opt/polkadot-sdk/target/production/polkadot-prepare-worker /usr/local/bin/polkadot-prepare-worker
+COPY --from=builder /opt/polkadot-sdk/target/production/polkadot-parachain /usr/local/bin/polkadot-parachain
 
 USER 65532
 
