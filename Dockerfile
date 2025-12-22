@@ -14,11 +14,6 @@ RUN apt-get update && \
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 RUN rustup target add wasm32v1-none
-# Keep `wasm32-unknown-unknown` and `rust-src` for LTS
-# Will remove once `polkadot-sdk` backports
-# https://github.com/paritytech/polkadot-sdk/pull/7008
-RUN rustup target add wasm32-unknown-unknown
-RUN rustup component add rust-src
 
 WORKDIR /opt
 ARG VERSION=stable2512
