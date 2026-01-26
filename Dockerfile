@@ -1,7 +1,7 @@
 ###################
 # --- builder --- #
 ###################
-FROM docker.io/rust:1.92-slim-trixie AS builder
+FROM docker.io/rust:1.93-slim-trixie AS builder
 
 RUN apt-get update && \
     apt-get -y dist-upgrade && \
@@ -17,15 +17,9 @@ ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 RUN rustup target add wasm32v1-none
 
 WORKDIR /opt
-ARG VERSION=stable2512
+ARG VERSION=stable2512-1
 RUN git clone https://github.com/paritytech/polkadot-sdk.git -b polkadot-$VERSION --depth 1
 WORKDIR /opt/polkadot-sdk
-# Apply `[stable2512] Backport 10365` patch only for stable2512
-RUN if [ "$VERSION" = "stable2512" ]; then \
-      curl -L https://github.com/paritytech/polkadot-sdk/pull/10706.patch -o /tmp/fix.patch && \
-      patch -p1 < /tmp/fix.patch && \
-      rm -f /tmp/fix.patch; \
-    fi
 RUN cargo build --locked \
   --profile production \
   --bin polkadot \
