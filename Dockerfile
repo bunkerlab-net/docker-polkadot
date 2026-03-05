@@ -16,20 +16,29 @@ RUN apt-get update && \
 ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 RUN rustup target add wasm32v1-none
 
+# https://doc.rust-lang.org/stable/cargo/reference/config.html#buildbuild-dir
+ENV CARGO_BUILD_BUILD_DIR=/opt/polkadot-sdk/.cargo-target
+
 WORKDIR /opt
 ARG VERSION=stable2512-2
 RUN git clone https://github.com/paritytech/polkadot-sdk.git -b polkadot-$VERSION --depth 1
 WORKDIR /opt/polkadot-sdk
 RUN cargo build --locked \
-  --profile production \
+  --profile release \
   --bin polkadot \
   --bin polkadot-execute-worker \
-  --bin polkadot-prepare-worker
+  --bin polkadot-prepare-worker \
+  --bin polkadot-parachain
 
 ##################
 # --- runner --- #
 ##################
-FROM docker.io/debian:13-slim
+FROM docker.io/debian:13-slim AS polkadot
+
+COPY --from=builder /opt/polkadot-sdk/target/production/polkadot /usr/local/bin/polkadot
+COPY --from=builder /opt/polkadot-sdk/target/production/polkadot-execute-worker /usr/local/bin/polkadot-execute-worker
+COPY --from=builder /opt/polkadot-sdk/target/production/polkadot-prepare-worker /usr/local/bin/polkadot-prepare-worker
+COPY --from=builder /opt/polkadot-sdk/target/production/polkadot-parachain /usr/local/bin/polkadot-parachain
 
 # Install curl for healthcheck
 RUN apt-get update && \
@@ -38,10 +47,6 @@ RUN apt-get update && \
 
 RUN groupadd --gid 65532 nonroot \
   && useradd --system --uid 65532 --gid 65532 --create-home --home-dir /home/nonroot --shell /usr/bin/bash nonroot
-
-COPY --from=builder /opt/polkadot-sdk/target/production/polkadot /usr/local/bin/polkadot
-COPY --from=builder /opt/polkadot-sdk/target/production/polkadot-execute-worker /usr/local/bin/polkadot-execute-worker
-COPY --from=builder /opt/polkadot-sdk/target/production/polkadot-prepare-worker /usr/local/bin/polkadot-prepare-worker
 
 USER 65532
 
