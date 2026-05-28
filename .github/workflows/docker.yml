@@ -10,10 +10,15 @@ on:
 
 permissions: {}
 
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/polkadot
+
 jobs:
   build:
     name: Build
     runs-on: ${{ matrix.runs-on }}
+    permissions:
+      packages: write
     strategy:
       matrix:
         arch: [amd64, arm64]
@@ -31,13 +36,20 @@ jobs:
         with:
           cache-binary: false
           version: latest
-      - name: Build
+      - uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ github.token }}
+      - name: Build and push
         uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
         with:
           platforms: linux/${{ matrix.arch }}
-          push: false
+          push: true
+          tags: ${{ env.IMAGE }}:sha-${{ github.sha }}-${{ matrix.arch }}
           cache-from: |
             type=gha,scope=docker-build-${{ matrix.arch }}
+            type=registry,ref=${{ env.IMAGE }}:latest
           cache-to: |
             type=gha,mode=min,scope=docker-build-${{ matrix.arch }}
           context: .
@@ -47,15 +59,12 @@ jobs:
   push:
     name: Push
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       packages: write
     outputs:
       version: ${{ steps.meta.outputs.version }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
       - uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
         with:
           registry: ghcr.io
@@ -68,17 +77,19 @@ jobs:
       - name: Check if release is latest
         if: github.event_name == 'release'
         id: check_latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CURRENT_RELEASE_ID: ${{ github.event.release.id }}
+          REPO: ${{ github.repository }}
         run: |
-          RELEASE_ID=$(curl -s -H "Authorization: Bearer ${{ github.token }}" \
-            "https://api.github.com/repos/${{ github.repository }}/releases/latest" \
+          RELEASE_ID=$(curl -s -H "Authorization: Bearer ${GH_TOKEN}" \
+            "https://api.github.com/repos/${REPO}/releases/latest" \
             | jq -r '.id')
           echo "is_latest=$([[ "$RELEASE_ID" == "$CURRENT_RELEASE_ID" ]] && echo "true" || echo "false")" >> $GITHUB_OUTPUT
-        env:
-          CURRENT_RELEASE_ID: ${{ github.event.release.id }}
       - uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6.1.0
         id: meta
         with:
-          images: ghcr.io/${{ github.repository_owner }}/polkadot
+          images: ${{ env.IMAGE }}
           flavor: |
             latest=false
           tags: |
@@ -87,16 +98,18 @@ jobs:
             type=ref,event=branch
             type=ref,event=pr
             type=ref,event=tag
-      - name: Package and Push
-        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
-        with:
-          platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          push: true
-          cache-from: |
-            type=gha,scope=docker-build-amd64
-            type=gha,scope=docker-build-arm64
-          context: .
-          build-args: >-
-            ${{ github.event_name == 'release' && format('VERSION={0}', github.ref_name) || '' }}
+      - name: Create and push multi-arch manifest
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+          IMAGE: ${{ env.IMAGE }}
+          SHA: ${{ github.sha }}
+        run: |-
+          echo "$TAGS" | while IFS= read -r tag; do
+            if [ -n "$tag" ]; then
+              echo "Creating manifest for: $tag"
+              docker buildx imagetools create \
+                --tag "$tag" \
+                "${IMAGE}:sha-${SHA}-amd64" \
+                "${IMAGE}:sha-${SHA}-arm64"
+            fi
+          done

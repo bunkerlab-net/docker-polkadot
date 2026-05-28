@@ -1,0 +1,41 @@
+name: GHCR Cleanup
+
+# Prune sha-*, pr-*, and untagged images older than 14 days.
+# latest, stable, and semver/release tags are intentionally preserved.
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: "Dry run: log deletions without removing anything"
+        required: false
+        default: false
+        type: boolean
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    name: Prune old images
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Prune sha-*, pr-*, and untagged images older than 14 days
+        uses: dataaxiom/ghcr-cleanup-action@f092b48ba3b604b2a83690dc4b2bbb3392e1045f # v1.2.1
+        with:
+          owner: ${{ github.repository_owner }}
+          packages: polkadot
+          older-than: 14 days
+          delete-tags: sha-*,pr-*
+          delete-untagged: true
+          validate: true
+          dry-run: ${{ github.event.inputs.dry-run || 'false' }}

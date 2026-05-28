@@ -1,0 +1,36 @@
+name: Clean PR Cache
+
+on:
+  pull_request:
+    types:
+      - closed
+
+permissions: {}
+
+jobs:
+  cleanup:
+    name: Clean PR Cache
+    runs-on: ubuntu-24.04
+    permissions:
+      # `actions:write` permission is required to delete caches
+      #   See also: https://docs.github.com/en/rest/actions/cache?apiVersion=2022-11-28#delete-a-github-actions-cache-for-a-repository-using-a-cache-id
+      actions: write
+      contents: read
+    steps:
+      - name: Cleanup
+        run: |-
+          echo "Fetching list of cache key"
+          mapfile -t cacheKeysForPR < <(gh cache list --ref "$BRANCH" --limit 100 --json id --jq '.[].id')
+
+          ## Setting this to not fail the workflow while deleting cache keys.
+          set +e
+          echo "Deleting caches..."
+          for cacheKey in "${cacheKeysForPR[@]}"; do
+            echo "Deleting cache with key: ${cacheKey}"
+            gh cache delete "$cacheKey"
+          done
+          echo "Done"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          BRANCH: refs/pull/${{ github.event.pull_request.number }}/merge
