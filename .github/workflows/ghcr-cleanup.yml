@@ -24,6 +24,7 @@ jobs:
   cleanup:
     name: Prune old images
     runs-on: ubuntu-24.04
+
     permissions:
       contents: read
       packages: write
@@ -37,5 +38,15 @@ jobs:
           older-than: 14 days
           delete-tags: sha-*,pr-*
           delete-untagged: true
+          validate: true
+          dry-run: ${{ github.event.inputs.dry-run || 'false' }}
+
+      - name: Prune master-* images
+        uses: dataaxiom/ghcr-cleanup-action@f092b48ba3b604b2a83690dc4b2bbb3392e1045f # v1.2.1
+        with:
+          owner: ${{ github.repository_owner }}
+          packages: polkadot
+          delete-tags: master-*
+          keep-n-tagged: 10
           validate: true
           dry-run: ${{ github.event.inputs.dry-run || 'false' }}
