@@ -1,7 +1,7 @@
 ###################
 # --- builder --- #
 ###################
-FROM docker.io/rust:1.98-slim-trixie AS builder
+FROM docker.io/rust:1.99-slim-trixie AS builder
 
 RUN apt-get update && \
     apt-get -y dist-upgrade && \
@@ -20,7 +20,7 @@ RUN rustup target add wasm32v1-none
 ENV WASM_BUILD_RUSTFLAGS="-Clink-arg=--allow-undefined"
 
 WORKDIR /opt
-ARG VERSION=stable2606-2
+ARG VERSION=stable2606-3
 RUN git clone https://github.com/paritytech/polkadot-sdk.git -b polkadot-$VERSION --depth 1
 WORKDIR /opt/polkadot-sdk
 RUN cargo build --locked \
