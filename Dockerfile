@@ -20,7 +20,7 @@ RUN rustup target add wasm32v1-none
 ENV WASM_BUILD_RUSTFLAGS="-Clink-arg=--allow-undefined"
 
 WORKDIR /opt
-ARG VERSION=stable2609
+ARG VERSION=stable2609-1
 RUN git clone https://github.com/paritytech/polkadot-sdk.git -b polkadot-$VERSION --depth 1
 WORKDIR /opt/polkadot-sdk
 RUN cargo build --locked \
